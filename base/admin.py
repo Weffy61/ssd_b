@@ -26,6 +26,7 @@ class PersonAddressAdmin(admin.ModelAdmin):
     list_display = ['id', 'address', 'city', 'state', 'zip_code']
     search_fields = ['address', 'city', 'state', 'zip_code']
 
+
 @admin.register(AllPersonsData)
 class AllPersonsDataAdmin(admin.ModelAdmin):
     pass
