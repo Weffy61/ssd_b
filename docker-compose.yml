@@ -67,7 +67,7 @@ services:
   celery:
     build: .
     container_name: celery_worker
-    command: celery -A ssn_dob_bot worker --l info
+    command: celery -A ssn_dob_bot worker -l info
     volumes:
       - .:/app
     depends_on:
