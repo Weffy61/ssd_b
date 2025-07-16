@@ -1,3 +1,4 @@
+from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 
 
@@ -14,6 +15,8 @@ class Person(models.Model):
         unique_together = ('first_name', 'last_name', 'middle_name', 'ssn')
         indexes = [
             models.Index(fields=['first_name', 'last_name', 'middle_name', 'ssn']),
+            GinIndex(fields=["first_name"], name="trgm_idx_first_name", opclasses=["gin_trgm_ops"]),
+            GinIndex(fields=["last_name"], name="trgm_idx_last_name", opclasses=["gin_trgm_ops"]),
         ]
         verbose_name = 'Person'
         verbose_name_plural = 'Persons'
