@@ -57,6 +57,9 @@ class PersonAddress(models.Model):
     class Meta:
         ordering = ['id']
         unique_together = ('address', 'city', 'county', 'state', 'zip_code', 'phone')
+        indexes = [
+            GinIndex(fields=["address"], name="trgm_idx_address", opclasses=["gin_trgm_ops"]),
+        ]
         verbose_name = 'Personal address'
         verbose_name_plural = 'Personal addresses'
 
