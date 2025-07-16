@@ -25,7 +25,7 @@ def search_by_address(chat_id, person_info=None, person_id=None):
             persons = Person.objects.filter(
                 first_name__icontains=person_info.first_name.strip(),
                 last_name__icontains=person_info.last_name.strip(),
-                home_addresses__address__icontains=house_number,
+                home_addresses__address__contains=house_number,
             ).prefetch_related('home_addresses')
 
             for some_person in persons:
