@@ -5,6 +5,10 @@ import psycopg2
 import tempfile
 from datetime import datetime
 
+EXPECTED_LENGTH = 20
+INSERT_INDEX = 9
+TRIM_START_INDEX = 15
+
 
 def parse_date(date_str):
     date_str = date_str.strip()
@@ -18,7 +22,7 @@ def parse_date(date_str):
 
 def connect_db():
     return psycopg2.connect(
-        dbname="s4ndman",
+        dbname="django_db",
         user="admin",
         password="root",
         host="localhost",
@@ -27,10 +31,18 @@ def connect_db():
 
 
 def import_data(file_path, batch_size):
+    try:
+        print('Checking database')
+        conn = connect_db()
+        conn.close()
+        print('Database connection successful')
+    except Exception as e:
+        print(f'Database connection failed: {e}')
+        return
     with tempfile.NamedTemporaryFile(mode='w+', delete=False, buffering=1024*1024) as temp_file:
         temp_filename = temp_file.name
 
-        with open(file_path, 'r', encoding='utf-8', buffering=1024*1024) as f:
+        with open(file_path, 'r', encoding='utf-8', errors='ignore', buffering=1024*1024) as f:
             headers = f.readline().strip().split(',')
             line_num = 0
             batch_counter = 0
@@ -40,36 +52,18 @@ def import_data(file_path, batch_size):
                 batch_counter += 1
                 parts = line.strip().split(',')
 
-                # row = dict(zip(headers, parts))
-                # # Обработка вариативной длины строк
-                if len(parts) == 20:
-                    row = dict(zip(headers, parts))
-                elif len(parts) == 19:
-                    parts.insert(9, '')
-                    row = dict(zip(headers, parts))
-                elif len(parts) == 21:
-                    parts.pop(15)
-                    row = dict(zip(headers, parts))
-                elif len(parts) == 22:
-                    parts.pop(15)
-                    parts.pop(16)
-                    row = dict(zip(headers, parts))
-                elif len(parts) == 23:
-                    parts.pop(15)
-                    parts.pop(16)
-                    parts.pop(17)
-                    row = dict(zip(headers, parts))
-                elif len(parts) == 24:
-                    parts.pop(15)
-                    parts.pop(16)
-                    parts.pop(17)
-                    parts.pop(18)
-                    row = dict(zip(headers, parts))
+                if len(parts) == EXPECTED_LENGTH:
+                    pass
+                elif len(parts) == EXPECTED_LENGTH - 1:
+                    parts.insert(INSERT_INDEX, '')
+                elif len(parts) > EXPECTED_LENGTH:
+                    while len(parts) > EXPECTED_LENGTH:
+                        parts.pop(TRIM_START_INDEX)
                 else:
                     print(f'Error in line {line_num}: {line} with len - {len(parts)}')
                     continue
 
-                # Подготовка данных для AllPersonsData
+                row = dict(zip(headers, parts))
                 first_name = row.get('firstname', '').strip().replace('\t', ' ')[:100] or None
                 last_name = row.get('lastname', '').strip().replace('\t', ' ')[:100] or None
                 middle_name = (row.get('middlename', '').strip() or '')[:100].replace('\t', ' ') or None
@@ -88,13 +82,11 @@ def import_data(file_path, batch_size):
                 state = (row.get('st', '').strip() or '')[:100].replace('\t', ' ') or None
                 zip_code = (row.get('zip', '').strip() or '')[:50].replace('\t', ' ') or None
                 phone = (row.get('phone1', '').strip() or '')[:50].replace('\t', ' ') or None
-                start_date = None  # Это поле не заполняется из исходных данных
+                start_date = None
 
-                # Замена пустых строк на \N для NULL в COPY
                 def format_value(val):
                     return '\\N' if val is None else str(val)
 
-                # Запись в временный файл
                 temp_file.write(
                     f"{format_value(first_name)}\t{format_value(last_name)}\t{format_value(middle_name)}\t"
                     f"{format_value(ssn)}\t{format_value(dob)}\t{format_value(name_suffix)}\t"
@@ -105,7 +97,6 @@ def import_data(file_path, batch_size):
                     f"{format_value(zip_code)}\t{format_value(phone)}\t{format_value(start_date)}\n"
                 )
 
-                # Логирование прогресса
                 if batch_counter >= batch_size:
                     print(f"Processed {line_num} rows...")
                     temp_file.flush()
@@ -113,20 +104,17 @@ def import_data(file_path, batch_size):
 
         print("Finished processing file. Starting COPY command...")
 
-        # Подключаемся к базе
         conn = connect_db()
         conn.autocommit = False
         cursor = conn.cursor()
 
         try:
-            # Оптимизации для ускорения загрузки
             cursor.execute("SET synchronous_commit TO off;")
             cursor.execute("SET maintenance_work_mem TO '1GB';")
             cursor.execute("SET work_mem TO '256MB';")
             cursor.execute("ALTER TABLE base_allpersonsdata SET UNLOGGED;")
             cursor.execute("ALTER TABLE base_allpersonsdata DISABLE TRIGGER USER;")
 
-            # Копируем данные
             print("Copying AllPersonsData data...")
             with open(temp_filename, 'r') as f:
                 cursor.copy_expert(
@@ -138,7 +126,6 @@ def import_data(file_path, batch_size):
                     f
                 )
 
-            # Включаем обратно логирование и триггеры
             cursor.execute("ALTER TABLE base_allpersonsdata SET LOGGED;")
             cursor.execute("ALTER TABLE base_allpersonsdata ENABLE TRIGGER USER;")
 
@@ -152,7 +139,6 @@ def import_data(file_path, batch_size):
             cursor.close()
             conn.close()
 
-        # Удаляем временный файл
         os.unlink(temp_filename)
 
 
