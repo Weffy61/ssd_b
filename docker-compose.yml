@@ -15,12 +15,22 @@ services:
     volumes:
       - /opt/postgres_data:/var/lib/postgresql/data
 
+  bot:
+    build: .
+    restart: always
+    command: python bot.py
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - web
+
   web:
     restart: always
     build: .
     command: >
       sh -c "python manage.py migrate &&
-             python bot.py &
+             python manage.py collectstatic --noinput &&
              gunicorn --bind 0.0.0.0:8000 ssn_dob_bot.wsgi:application"
     volumes:
       - .:/app
@@ -48,9 +58,6 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
