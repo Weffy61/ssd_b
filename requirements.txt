@@ -3,8 +3,8 @@ environs==14.1.1
 dj-database-url==2.3.0
 celery==5.5.2
 aiofiles==24.1.0
-psycopg2==2.9.10
 aiogram==3.20.0.post0
 asgiref==3.8.1
 asyncpg==0.30.0
 psutil==7.0.0
+psycopg2-binary==2.9.10
