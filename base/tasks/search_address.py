@@ -20,12 +20,14 @@ def search_by_address(chat_id, person_info=None, person_id=None):
         else:
             person = None
             person_info = PersonSearch(**person_info)
+            house_number = extract_house_number(person_info.address)
+
             persons = Person.objects.filter(
                 first_name__icontains=person_info.first_name.strip(),
-                last_name__icontains=person_info.last_name.strip()
+                last_name__icontains=person_info.last_name.strip(),
+                home_addresses__address__icontains=house_number,
             ).prefetch_related('home_addresses')
 
-            house_number = extract_house_number(person_info.address)
             for some_person in persons:
                 for addr in some_person.home_addresses.all():
                     if (
