@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14.8-alpine3.18
+    container_name: postgres_s4
+    restart: always
+    environment:
+      POSTGRES_DB: "django_db"
+      POSTGRES_USER: "s4ndman"
+      POSTGRES_PASSWORD: "wweraw"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - /opt/postgres_data:/var/lib/postgresql/data
+
+  web:
+    restart: always
+    build: .
+    command: >
+      sh -c "python manage.py migrate &&
+             python bot.py &
+             gunicorn --bind 0.0.0.0:8000 ssn_dob_bot.wsgi:application"
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    expose:
+      - 8000
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  nginx:
+    restart: always
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - static_volume:/app/static
+      - media_volume:/app/media
+    depends_on:
+      - web
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    restart: unless-stopped
+
+  celery:
+    build: .
+    container_name: celery_worker
+    command: celery -A ssn_dob_bot worker --l info
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - rabbitmq
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
