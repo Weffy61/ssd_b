@@ -2,9 +2,8 @@ from django.db import models
 
 
 class Person(models.Model):
-    # first_name = models.CharField(max_length=100, db_index=True, null=True)
+    # Indexes was added CONCURRENTLY handdled
     first_name = models.CharField(max_length=100, null=True)
-    # last_name = models.CharField(max_length=100, db_index=True, null=True)
     last_name = models.CharField(max_length=100, null=True)
     middle_name = models.CharField(max_length=100, blank=True, null=True)
     home_addresses = models.ManyToManyField('PersonAddress', related_name='persons')
@@ -12,7 +11,10 @@ class Person(models.Model):
 
     class Meta:
         ordering = ['id', 'first_name', 'last_name']
-        # unique_together = ('first_name', 'last_name', 'middle_name', 'ssn')
+        unique_together = ('first_name', 'last_name', 'middle_name', 'ssn')
+        indexes = [
+            models.Index(fields=['first_name', 'last_name', 'middle_name', 'ssn']),
+        ]
         verbose_name = 'Person'
         verbose_name_plural = 'Persons'
 
@@ -21,14 +23,10 @@ class Person(models.Model):
 
 
 class PersonalData(models.Model):
-    # dob = models.DateField(blank=True, null=True, db_index=True)
     dob = models.DateField(blank=True, null=True)
     name_suffix = models.CharField(max_length=100, blank=True, null=True)
-    # alt1_dob = models.DateField(blank=True, null=True, db_index=True)
     alt1_dob = models.DateField(blank=True, null=True)
-    # alt2_dob = models.DateField(blank=True, null=True, db_index=True)
     alt2_dob = models.DateField(blank=True, null=True)
-    # alt3_dob = models.DateField(blank=True, null=True, db_index=True)
     alt3_dob = models.DateField(blank=True, null=True)
     aka1_fullname = models.CharField(max_length=200, blank=True, null=True)
     aka2_fullname = models.CharField(max_length=200, blank=True, null=True)
@@ -44,17 +42,18 @@ class PersonalData(models.Model):
 
 
 class PersonAddress(models.Model):
+    # Indexes was added CONCURRENTLY handdled
     address = models.TextField(blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
     county = models.CharField(max_length=100, blank=True, null=True)
     state = models.CharField(max_length=100, blank=True, null=True)
     zip_code = models.CharField(max_length=50, blank=True, null=True)
-    # phone = models.CharField(max_length=50, blank=True, null=True, db_index=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
     start_date = models.DateField(blank=True, null=True)
 
     class Meta:
         ordering = ['id']
+        unique_together = ('address', 'city', 'county', 'state', 'zip_code', 'phone')
         verbose_name = 'Personal address'
         verbose_name_plural = 'Personal addresses'
 
@@ -82,3 +81,8 @@ class AllPersonsData(models.Model):
     zip_code = models.CharField(max_length=50, blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
     start_date = models.DateField(blank=True, null=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['first_name', 'last_name', 'middle_name', 'ssn']),
+        ]
