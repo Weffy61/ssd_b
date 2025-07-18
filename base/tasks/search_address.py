@@ -12,11 +12,9 @@ from base.tasks.utils import run_async, send_result
 @shared_task
 def search_by_address(chat_id, person_info=None, person_id=None):
     markup = None
-    # person = None
     try:
         if person_id:
             msg_text, markup, success = get_personal_data(person_id)
-            # person = True
         else:
             person = None
             person_info = PersonSearch(**person_info)
@@ -38,7 +36,6 @@ def search_by_address(chat_id, person_info=None, person_id=None):
                     ):
 
                         person = some_person
-                        person_address = addr
                         break
                 else:
                     continue
