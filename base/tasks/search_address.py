@@ -62,7 +62,7 @@ def search_by_address(chat_id, person_info=None, person_id=None):
 def get_personal_data(person_id):
     person = Person.objects.get(pk=person_id)
     middle_name = person.middle_name if person.middle_name else ''
-    found_addresses = [address for address in person.home_addresses.all()]
+    found_addresses = [address for address in person.home_addresses.all().distinct()]
     dobs = '\n'.join(set(
         f'{pd.dob.month}/{pd.dob.day}/{pd.dob.year}'
         for pd in person.personal_datas.all() if pd.dob
