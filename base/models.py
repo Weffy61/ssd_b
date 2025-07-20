@@ -8,6 +8,8 @@ class Person(models.Model):
     last_name = models.CharField(max_length=100, null=True)
     middle_name = models.CharField(max_length=100, blank=True, null=True)
     home_addresses = models.ManyToManyField('PersonAddress', related_name='persons')
+    phones = models.ManyToManyField('Phone', related_name='persons')
+    emails = models.ManyToManyField('Email', related_name='persons')
     ssn = models.CharField(max_length=10, blank=True, null=True)
 
     class Meta:
@@ -65,6 +67,14 @@ class PersonAddress(models.Model):
 
     def __str__(self):
         return f'{self.address}, {self.city}, {self.state}, {self.zip_code}'
+
+
+class Phone(models.Model):
+    phone_number = models.CharField(max_length=15, unique=True)
+
+
+class Email(models.Model):
+    email = models.CharField(max_length=250, unique=True)
 
 
 class AllPersonsData(models.Model):
