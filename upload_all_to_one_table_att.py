@@ -170,7 +170,7 @@ def extract_address_info(parts: list) -> tuple:
             return None, None, None, None
     else:
         return None, None, None, None
-    address = f'{addr_1}, {addr_2}' if addr_2 else addr_1
+    address = clean_address(f'{addr_1}, {addr_2}' if addr_2 else addr_1)
 
     return address, city, state, zip_code
 
@@ -195,6 +195,14 @@ def connect_db():
         host="localhost",
         port="5432"
     )
+
+
+def clean_address(val: str) -> Optional[str]:
+    if not val:
+        return None
+    val = re.sub(r'[^A-Z0-9 ,\-]', '', val.upper())
+    val = re.sub(r'\s+', ' ', val)
+    return val.strip()
 
 
 def import_data(file_path, batch_size):
@@ -247,12 +255,26 @@ def import_data(file_path, batch_size):
                     state = safe_upper(state, 100)
                     zip_code = safe_trim(zip_code, 100)
 
-                    temp_file.write(
-                        f"{format_value(first_name)}\t{format_value(last_name)}\t{format_value(middle_name)}\t"
-                        f"{format_value(ssn)}\t{format_value(dob)}\t{format_value(address)}\t"
-                        f"{format_value(city)}\t{format_value(state)}\t{format_value(zip_code)}\t"
-                        f"{format_value(phone_1)}\t{format_value(phone_2)}\t{format_value(email)}\n"
-                    )
+                    values = [
+                        format_value(first_name),
+                        format_value(last_name),
+                        format_value(middle_name),
+                        format_value(ssn),
+                        format_value(dob),
+                        format_value(address),
+                        format_value(city),
+                        format_value(state),
+                        format_value(zip_code),
+                        format_value(phone_1),
+                        format_value(phone_2),
+                        format_value(email)
+                    ]
+                    if len(values) != 12:
+                        print(f"Line {line_num} skipped due to wrong field count: {values}")
+                        continue
+
+                    temp_file.write('\t'.join(values) + '\n')
+
                     if batch_counter >= batch_size:
                         print(f"Processed {line_num} rows...")
                         temp_file.flush()
