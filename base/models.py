@@ -116,4 +116,4 @@ class AllPersonsDataAtt(models.Model):
     zip_code = models.CharField(max_length=50, blank=True, null=True)
     phone_1 = models.CharField(max_length=15, blank=True, null=True)
     phone_2 = models.CharField(max_length=15, blank=True, null=True)
-    email = models.CharField(max_length=250, unique=True)
+    email = models.CharField(max_length=250, blank=True, null=True)
