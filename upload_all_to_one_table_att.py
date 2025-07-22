@@ -211,6 +211,7 @@ def import_data(file_path, batch_size):
             batch_counter = 0
             for line in f:
                 line_num += 1
+                batch_counter += 1
                 try:
                     parts = clean_line(line)
                     if len(parts) <= 6:
