@@ -92,7 +92,6 @@ def parse_name(full_name: str) -> tuple:
 
 
 def extract_address_info(parts: list) -> tuple:
-    address = city = state = zip_code = None
     addr_2 = ''
     full_address = parts[6:]
     if len(parts) == 8:
@@ -109,25 +108,25 @@ def extract_address_info(parts: list) -> tuple:
             return None, None, None, None
         city = last_part.strip()
     elif len(parts) == 9:
+        middle_part = full_address[1].strip()
+        last_part = full_address[2].strip()
+
         if contains_address_abbreviation(full_address[0]):
             addr_2 = full_address[0].strip()
             addr_1 = full_address[1].strip()
         else:
             addr_1 = full_address[0].strip()
-            middle_part = full_address[1].strip()
-            last_part = full_address[2].strip()
+        zip_code = extract_zip_code(last_part)
+        if not zip_code:
+            zip_code = extract_zip_code(middle_part)
 
-            zip_code = extract_zip_code(last_part)
-            if not zip_code:
-                zip_code = extract_zip_code(middle_part)
-
-            last_part = full_address[2].strip().split()
-            if extract_us_state_abbreviation(last_part[-1].strip()):
-                state = last_part[-1].strip()
-                last_part = ','.join(last_part).replace(state, '').split(',')
-                city = ' '.join(last_part).strip()
-            else:
-                return None, None, None, None
+        last_part = full_address[2].strip().split()
+        if extract_us_state_abbreviation(last_part[-1].strip()):
+            state = last_part[-1].strip()
+            last_part = ','.join(last_part).replace(state, '').split(',')
+            city = ' '.join(last_part).strip()
+        else:
+            return None, None, None, None
 
     elif len(parts) == 10:
         if contains_address_abbreviation(full_address[0].split()[0]):
