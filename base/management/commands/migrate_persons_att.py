@@ -20,6 +20,7 @@ class Command(BaseCommand):
         self.stdout.write(f"Finished inserting unique persons in {total:.2f} seconds.")
 
     def create_temp_indexes(self):
+        self.stdout.write("Create temp index...")
         with connection.cursor() as cursor:
             cursor.execute("""
                 CREATE INDEX CONCURRENTLY IF NOT EXISTS tmp_idx_att_person
@@ -27,6 +28,7 @@ class Command(BaseCommand):
             """)
 
     def drop_temp_indexes(self):
+        self.stdout.write("Drop temp index...")
         with connection.cursor() as cursor:
             cursor.execute("""
                 DROP INDEX IF EXISTS tmp_idx_att_person;
