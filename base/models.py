@@ -102,3 +102,18 @@ class AllPersonsData(models.Model):
         indexes = [
             models.Index(fields=['first_name', 'last_name', 'middle_name', 'ssn']),
         ]
+
+
+class AllPersonsDataAtt(models.Model):
+    first_name = models.CharField(max_length=100, null=True)
+    last_name = models.CharField(max_length=100, null=True)
+    middle_name = models.CharField(max_length=100, blank=True, null=True)
+    ssn = models.CharField(max_length=10, blank=True, null=True)
+    dob = models.DateField(blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    state = models.CharField(max_length=100, blank=True, null=True)
+    zip_code = models.CharField(max_length=50, blank=True, null=True)
+    phone_1 = models.CharField(max_length=15, blank=True, null=True)
+    phone_2 = models.CharField(max_length=15, blank=True, null=True)
+    email = models.CharField(max_length=250, unique=True)
