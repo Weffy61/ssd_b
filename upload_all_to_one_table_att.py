@@ -72,6 +72,7 @@ def validate_date(text: str) -> Optional[str]:
 
 
 def clean_line(line: str) -> List:
+    line = line.replace('\\', '')
     parts = line.strip().split('\"')
     return ''.join(parts).strip().replace('*', '').split(',')
 
