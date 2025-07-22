@@ -229,17 +229,18 @@ def import_data(file_path, batch_size):
                         continue
                     if all(x is None for x in [address, city, state, zip_code]):
                         continue
-                    first_name = safe_trim(first_name, 100)
-                    last_name = safe_trim(last_name, 100)
-                    middle_name = safe_trim(middle_name, 100).replace('\t', ' ')
+
+                    first_name = safe_trim(first_name, 100).upper()
+                    last_name = safe_trim(last_name, 100).upper()
+                    middle_name = safe_trim(middle_name, 100).replace('\t', ' ').upper()
                     ssn = safe_trim(ssn, 10)
                     dob = dob if dob else None
                     phone_1 = safe_trim(phone_1, 15)
                     phone_2 = safe_trim(phone_2, 15)
-                    email = safe_trim(email, 250).replace('\t', ' ')
-                    address = safe_trim(address, 300).replace('\t', ' ')
-                    city = safe_trim(city, 100).replace('\t', ' ')
-                    state = safe_trim(state, 100)
+                    email = safe_trim(email, 250).replace('\t', ' ').upper()
+                    address = safe_trim(address, 300).replace('\t', ' ').upper()
+                    city = safe_trim(city, 100).replace('\t', ' ').upper()
+                    state = safe_trim(state, 100).upper()
                     zip_code = safe_trim(zip_code, 100).replace('\t', ' ')
 
                     temp_file.write(
