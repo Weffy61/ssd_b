@@ -180,7 +180,11 @@ def format_value(val):
 
 
 def safe_trim(val, max_len):
-    return val[:max_len] if val else None
+    return val[:max_len].replace('\t', ' ') if val else None
+
+
+def safe_upper(val, max_length):
+    return safe_trim(val, max_length).upper() if val else val
 
 
 def connect_db():
@@ -230,18 +234,18 @@ def import_data(file_path, batch_size):
                     if all(x is None for x in [address, city, state, zip_code]):
                         continue
 
-                    first_name = safe_trim(first_name, 100).upper()
-                    last_name = safe_trim(last_name, 100).upper()
-                    middle_name = safe_trim(middle_name, 100).replace('\t', ' ').upper()
+                    first_name = safe_upper(first_name, 100)
+                    last_name = safe_upper(last_name, 100)
+                    middle_name = safe_upper(middle_name, 100)
                     ssn = safe_trim(ssn, 10)
                     dob = dob if dob else None
                     phone_1 = safe_trim(phone_1, 15)
                     phone_2 = safe_trim(phone_2, 15)
-                    email = safe_trim(email, 250).replace('\t', ' ').upper()
-                    address = safe_trim(address, 300).replace('\t', ' ').upper()
-                    city = safe_trim(city, 100).replace('\t', ' ').upper()
-                    state = safe_trim(state, 100).upper()
-                    zip_code = safe_trim(zip_code, 100).replace('\t', ' ')
+                    email = safe_upper(email, 250)
+                    address = safe_upper(address, 300)
+                    city = safe_upper(city, 100)
+                    state = safe_upper(state, 100)
+                    zip_code = safe_trim(zip_code, 100)
 
                     temp_file.write(
                         f"{format_value(first_name)}\t{format_value(last_name)}\t{format_value(middle_name)}\t"
