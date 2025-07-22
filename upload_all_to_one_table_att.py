@@ -186,8 +186,8 @@ def safe_trim(val, max_len):
 def connect_db():
     return psycopg2.connect(
         dbname="django_db",
-        user="admin",
-        password="root",
+        user="s4ndman",
+        password="wweraw",
         host="localhost",
         port="5432"
     )
