@@ -1,3 +1,5 @@
+import hashlib
+
 from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 
@@ -11,6 +13,12 @@ class Person(models.Model):
     phones = models.ManyToManyField('Phone', related_name='persons')
     emails = models.ManyToManyField('Email', related_name='persons')
     ssn = models.CharField(max_length=10, blank=True, null=True)
+    hash_key = models.CharField(max_length=64, db_index=True, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        base = f"{self.first_name}|{self.last_name}|{self.middle_name or ''}|{self.ssn or ''}"
+        self.hash_key = hashlib.sha256(base.encode("utf-8")).hexdigest()
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['id', 'first_name', 'last_name']
@@ -117,3 +125,4 @@ class AllPersonsDataAtt(models.Model):
     phone_1 = models.CharField(max_length=15, blank=True, null=True)
     phone_2 = models.CharField(max_length=15, blank=True, null=True)
     email = models.CharField(max_length=250, blank=True, null=True)
+    hash_key = models.CharField(max_length=64, db_index=True, null=True, blank=True)
