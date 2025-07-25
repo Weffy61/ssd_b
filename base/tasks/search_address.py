@@ -120,7 +120,7 @@ Full Address: \n{found_addresses[page - 1].address},
 {found_addresses[page - 1].state}, 
 {found_addresses[page - 1].zip_code}
 {found_addresses[page - 1].phone if found_addresses[page - 1].phone else ""}\n
-SSN: \n{person.ssn}\n
+SSN: \n{person.ssn if person.ssn else 'ssn not found'}\n
 DOBs: \n{dobs}
 {all_alt_dobs}
                 ''')
